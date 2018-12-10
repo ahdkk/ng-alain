@@ -1,13 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  OnInit,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd';
-import { SimpleTableColumn } from '@delon/abc';
+import { STColumn } from '@delon/abc';
 import { getTimeDistance, yuan } from '@delon/util';
 import { _HttpClient } from '@delon/theme';
+import { I18NService } from '@core/i18n/i18n.service';
 
 @Component({
   selector: 'app-dashboard-analysis',
   templateUrl: './analysis.component.html',
   styleUrls: ['./analysis.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardAnalysisComponent implements OnInit {
   data: any = {
@@ -20,33 +27,45 @@ export class DashboardAnalysisComponent implements OnInit {
     .fill({})
     .map((item, i) => {
       return {
-        title: `工专路 ${i} 号店`,
+        title: this.i18n.fanyi('app.analysis.test', { no: i }),
         total: 323234,
       };
     });
-  searchColumn: SimpleTableColumn[] = [
-    { title: '排名', index: 'index' },
+  titleMap = {
+    y1: this.i18n.fanyi('app.analysis.traffic'),
+    y2: this.i18n.fanyi('app.analysis.payments'),
+  };
+  searchColumn: STColumn[] = [
+    { title: '排名', i18n: 'app.analysis.table.rank', index: 'index' },
     {
       title: '搜索关键词',
+      i18n: 'app.analysis.table.search-keyword',
       index: 'keyword',
       click: (item: any) => this.msg.success(item.keyword),
     },
     {
       type: 'number',
       title: '用户数',
+      i18n: 'app.analysis.table.users',
       index: 'count',
       sorter: (a, b) => a.count - b.count,
     },
     {
       type: 'number',
       title: '周涨幅',
+      i18n: 'app.analysis.table.weekly-range',
       index: 'range',
       render: 'range',
       sorter: (a, b) => a.range - b.range,
     },
   ];
 
-  constructor(private http: _HttpClient, public msg: NzMessageService) {}
+  constructor(
+    private http: _HttpClient,
+    public msg: NzMessageService,
+    private i18n: I18NService,
+    private cd: ChangeDetectorRef,
+  ) {}
 
   ngOnInit() {
     this.http.get('/chart').subscribe((res: any) => {
@@ -61,6 +80,7 @@ export class DashboardAnalysisComponent implements OnInit {
 
   setDate(type: any) {
     this.date_range = getTimeDistance(type);
+    setTimeout(() => this.cd.detectChanges());
   }
 
   salesType = 'all';
@@ -71,10 +91,12 @@ export class DashboardAnalysisComponent implements OnInit {
       this.salesType === 'all'
         ? this.data.salesTypeData
         : this.salesType === 'online'
-          ? this.data.salesTypeDataOnline
-          : this.data.salesTypeDataOffline;
-    if (this.salesPieData)
+        ? this.data.salesTypeDataOnline
+        : this.data.salesTypeDataOffline;
+    if (this.salesPieData) {
       this.salesTotal = this.salesPieData.reduce((pre, now) => now.y + pre, 0);
+    }
+    this.cd.detectChanges();
   }
 
   handlePieValueFormat(value: any) {
@@ -82,7 +104,5 @@ export class DashboardAnalysisComponent implements OnInit {
   }
 
   _activeTab = 0;
-  _tabChange(value: any) {
-    console.log('tab', this._activeTab, value);
-  }
+  _tabChange(value: any) {}
 }

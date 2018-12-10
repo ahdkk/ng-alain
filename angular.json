@@ -21,7 +21,6 @@
               "src/favicon.ico"
             ],
             "styles": [
-              "node_modules/simple-line-icons/css/simple-line-icons.css",
               "src/styles.less"
             ],
             "scripts": [
@@ -96,11 +95,9 @@
               "node_modules/qrious/dist/qrious.min.js"
             ],
             "styles": [
-              "src/styles.less"
             ],
             "assets": [
-              "src/assets",
-              "src/favicon.ico"
+              "src/assets"
             ]
           }
         },
